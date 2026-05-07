@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Employee Onboarding System</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--bg:#060811;--surface:rgba(15,18,35,0.85);--card:rgba(20,24,45,0.7);--border:rgba(100,120,255,0.15);--accent:#6c63ff;--accent2:#a78bfa;--cyan:#22d3ee;--green:#10b981;--red:#f87171;--text:#e2e8f0;--muted:#64748b;--radius:16px}
+    body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+    #canvas{position:fixed;inset:0;z-index:0;pointer-events:none}
+    .grid-bg{position:fixed;inset:0;z-index:0;background-image:linear-gradient(rgba(108,99,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(108,99,255,0.03) 1px,transparent 1px);background-size:60px 60px;pointer-events:none}
+    .orb{position:fixed;border-radius:50%;filter:blur(100px);pointer-events:none;z-index:0;animation:orbF linear infinite}
+    .orb1{width:500px;height:500px;background:radial-gradient(circle,rgba(108,99,255,0.2),transparent 70%);top:-100px;left:-100px;animation-duration:22s}
+    .orb2{width:400px;height:400px;background:radial-gradient(circle,rgba(34,211,238,0.15),transparent 70%);bottom:-80px;right:-80px;animation-duration:28s}
+    @keyframes orbF{0%{transform:translate(0,0) scale(1)}50%{transform:translate(30px,-30px) scale(1.05)}100%{transform:translate(0,0) scale(1)}}
+
+    header{background:var(--surface);border-bottom:1px solid var(--border);padding:18px 36px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);justify-content:space-between;animation:fadeD .6s both}
+    .logo{width:46px;height:46px;background:linear-gradient(135deg,#6c63ff,#a78bfa);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 6px 28px rgba(108,99,255,0.5),0 0 0 1px rgba(255,255,255,0.1) inset;position:relative;overflow:hidden;animation:lPulse 3s ease-in-out infinite}
+    .logo::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.2),transparent);border-radius:inherit}
+    @keyframes lPulse{0%,100%{box-shadow:0 6px 28px rgba(108,99,255,0.5)}50%{box-shadow:0 6px 40px rgba(108,99,255,0.7)}}
+    header h1{font-family:'Space Grotesk',sans-serif;font-size:1.2rem;font-weight:700;letter-spacing:-0.02em}
+    header span{font-size:.8rem;color:var(--muted)}
+    .logout-btn{padding:9px 20px;background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.25);border-radius:10px;color:#f87171;font-family:inherit;font-size:.83rem;font-weight:600;cursor:pointer;transition:all .2s;backdrop-filter:blur(8px)}
+    .logout-btn:hover{background:rgba(248,113,113,0.2);transform:translateY(-1px);box-shadow:0 4px 16px rgba(248,113,113,0.2)}
+
+    .stats-bar{display:flex;gap:16px;padding:24px 36px 0;flex-wrap:wrap}
+    .stat-card{flex:1;min-width:140px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px;backdrop-filter:blur(16px);transition:transform .25s,box-shadow .25s;animation:fadeU .6s both;position:relative;overflow:hidden}
+    .stat-card::before{content:'';position:absolute;inset:-1px;border-radius:var(--radius);background:linear-gradient(135deg,rgba(108,99,255,0.3),transparent 60%);z-index:-1;opacity:0;transition:opacity .3s}
+    .stat-card:hover{transform:translateY(-4px);box-shadow:0 12px 40px rgba(0,0,0,0.3)}
+    .stat-card:hover::before{opacity:1}
+    .stat-card:nth-child(1){animation-delay:.1s}.stat-card:nth-child(2){animation-delay:.2s}.stat-card:nth-child(3){animation-delay:.3s}.stat-card:nth-child(4){animation-delay:.4s}
+    .stat-card .val{font-family:'Space Grotesk',sans-serif;font-size:2.2rem;font-weight:700;background:linear-gradient(135deg,#fff 30%,var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .stat-card .lbl{font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
+
+    main{display:flex;gap:28px;padding:24px 36px 40px;flex-wrap:wrap;position:relative;z-index:1}
+    .panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px;backdrop-filter:blur(16px);animation:fadeU .6s .3s both;position:relative;overflow:hidden}
+    .panel::before{content:'';position:absolute;inset:-1px;border-radius:var(--radius);background:linear-gradient(135deg,rgba(108,99,255,0.4),rgba(34,211,238,0.2),transparent 60%);z-index:-1;opacity:0;transition:opacity .4s}
+    .panel:hover::before{opacity:1}
+    .panel-title{font-family:'Space Grotesk',sans-serif;font-size:1.05rem;font-weight:600;margin-bottom:20px;display:flex;align-items:center;gap:8px}
+    .form-panel{flex:0 0 360px}
+
+    .form-group{margin-bottom:16px}
+    label{display:block;font-size:.76rem;color:var(--muted);margin-bottom:7px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+    input[type="text"],input[type="email"]{width:100%;background:rgba(8,10,20,0.7);border:1px solid var(--border);border-radius:12px;padding:12px 16px;color:var(--text);font-family:inherit;font-size:.88rem;outline:none;transition:border-color .25s,box-shadow .25s,background .25s}
+    input[type="text"]:focus,input[type="email"]:focus{border-color:rgba(108,99,255,0.6);background:rgba(12,15,28,0.9);box-shadow:0 0 0 4px rgba(108,99,255,0.12),0 0 20px rgba(108,99,255,0.08)}
+
+    .checkbox-group{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
+    .checkbox-item{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:11px 16px;cursor:pointer;transition:border-color .2s,background .2s,transform .15s}
+    .checkbox-item:hover{border-color:rgba(108,99,255,0.4);background:rgba(108,99,255,0.06);transform:translateX(4px)}
+    .checkbox-item input[type="checkbox"]{width:16px;height:16px;accent-color:var(--accent);cursor:pointer}
+    .checkbox-item label{margin:0;cursor:pointer;font-size:.86rem;color:var(--text);text-transform:none;letter-spacing:0}
+
+    .btn{width:100%;padding:14px;background:linear-gradient(135deg,#6c63ff 0%,#8b5cf6 50%,#a78bfa 100%);background-size:200% 200%;border:none;border-radius:12px;color:#fff;font-size:.93rem;font-weight:700;cursor:pointer;font-family:'Space Grotesk',sans-serif;transition:transform .2s,box-shadow .2s,background-position .4s;box-shadow:0 4px 24px rgba(108,99,255,0.4);position:relative;overflow:hidden}
+    .btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.15),transparent);border-radius:inherit}
+    .btn:hover{transform:translateY(-2px);box-shadow:0 8px 36px rgba(108,99,255,0.55);background-position:right center}
+    .btn:active{transform:translateY(0)}
+    .btn .ripple{position:absolute;border-radius:50%;background:rgba(255,255,255,0.25);transform:scale(0);animation:rip .6s linear;pointer-events:none}
+    @keyframes rip{to{transform:scale(4);opacity:0}}
+
+    .table-panel{flex:1;min-width:300px}
+    .search-bar{width:100%;background:rgba(8,10,20,0.7);border:1px solid var(--border);border-radius:12px;padding:12px 16px;color:var(--text);font-family:inherit;font-size:.88rem;outline:none;margin-bottom:16px;transition:border-color .25s,box-shadow .25s}
+    .search-bar:focus{border-color:rgba(108,99,255,0.6);box-shadow:0 0 0 4px rgba(108,99,255,0.12)}
+
+    .table-wrap{overflow-x:auto;border-radius:12px;border:1px solid var(--border)}
+    table{width:100%;border-collapse:collapse;font-size:.85rem}
+    thead tr{background:rgba(15,18,35,0.9)}
+    th{padding:13px 16px;text-align:left;color:var(--muted);font-weight:600;font-size:.73rem;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border)}
+    td{padding:14px 16px;border-bottom:1px solid rgba(100,120,255,0.08);vertical-align:middle}
+    tbody tr{transition:background .2s,transform .15s}
+    tbody tr:hover{background:rgba(108,99,255,0.08)}
+
+    .badge{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;font-size:.73rem;font-weight:600;transition:transform .15s}
+    .badge:hover{transform:scale(1.05)}
+    .badge.done{background:rgba(16,185,129,0.15);color:var(--green);border:1px solid rgba(16,185,129,0.2)}
+    .badge.pending{background:rgba(248,113,113,0.1);color:var(--red);border:1px solid rgba(248,113,113,0.15)}
+
+    .progress-bar{background:rgba(100,120,255,0.15);border-radius:99px;height:7px;width:85px;overflow:hidden}
+    .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--cyan),var(--green));border-radius:99px;transition:width .5s cubic-bezier(.4,0,.2,1)}
+
+    .action-btn{padding:6px 14px;border-radius:8px;border:1px solid rgba(108,99,255,0.3);background:rgba(108,99,255,0.08);color:var(--accent2);font-size:.78rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s;backdrop-filter:blur(4px)}
+    .action-btn:hover{background:var(--accent);color:#fff;transform:translateY(-1px);box-shadow:0 4px 16px rgba(108,99,255,0.4)}
+    .delete-btn{padding:6px 14px;border-radius:8px;border:1px solid rgba(248,113,113,0.3);background:rgba(248,113,113,0.08);color:#f87171;font-size:.78rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s}
+    .delete-btn:hover{background:#f87171;color:#fff;transform:translateY(-1px);box-shadow:0 4px 16px rgba(248,113,113,0.4)}
+
+    .empty-state{text-align:center;padding:48px 0;color:var(--muted);font-size:.88rem}
+    .empty-state .icon{font-size:3rem;margin-bottom:10px}
+
+    #toast{position:fixed;bottom:28px;right:28px;background:var(--green);color:#fff;padding:14px 22px;border-radius:12px;font-weight:600;font-size:.875rem;box-shadow:0 8px 32px rgba(0,0,0,0.5);transform:translateY(80px);opacity:0;transition:transform .35s cubic-bezier(.4,0,.2,1),opacity .35s;z-index:999;backdrop-filter:blur(8px)}
+    #toast.show{transform:translateY(0);opacity:1}
+    #toast.error{background:var(--red)}
+
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(6px)}
+    .modal-overlay.open{display:flex}
+    .modal{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:32px;width:400px;max-width:95vw;backdrop-filter:blur(24px);box-shadow:0 32px 100px rgba(0,0,0,0.6),0 0 60px rgba(108,99,255,0.08);animation:modalIn .3s cubic-bezier(.16,1,.3,1)}
+    @keyframes modalIn{from{opacity:0;transform:scale(0.95) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}
+    .modal h2{font-family:'Space Grotesk',sans-serif;font-size:1.05rem;margin-bottom:18px}
+    .modal-actions{display:flex;gap:10px;margin-top:22px}
+    .btn-cancel{flex:1;padding:12px;background:rgba(8,10,20,0.7);border:1px solid var(--border);border-radius:10px;color:var(--muted);font-family:inherit;cursor:pointer;transition:all .2s;font-weight:500}
+    .btn-cancel:hover{border-color:rgba(108,99,255,0.4);color:var(--text)}
+    .btn-save{flex:1}
+
+    @keyframes fadeD{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes fadeU{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    @media(max-width:700px){header{padding:14px 18px}.stats-bar,main{padding-left:16px;padding-right:16px}.form-panel{flex:1 1 100%}}
+  </style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<div class="grid-bg"></div>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+
+<header>
+  <div style="display:flex;align-items:center;gap:16px">
+    <div class="logo">🧑‍💼</div>
+    <div><h1>Employee Onboarding <span>System</span></h1></div>
+  </div>
+  <form method="post" action="/logout" style="margin:0">
+    <button type="submit" class="logout-btn">🚪 Logout</button>
+  </form>
+</header>
+
+<div class="stats-bar">
+  <div class="stat-card"><div class="val" id="stat-total">0</div><div class="lbl">Total Employees</div></div>
+  <div class="stat-card"><div class="val" id="stat-docs">0</div><div class="lbl">Docs Submitted</div></div>
+  <div class="stat-card"><div class="val" id="stat-it">0</div><div class="lbl">IT Setup Done</div></div>
+  <div class="stat-card"><div class="val" id="stat-training">0</div><div class="lbl">Training Completed</div></div>
+</div>
+
+<main>
+  <div class="panel form-panel">
+    <div class="panel-title"><span>➕</span> Add New Employee</div>
+    <div class="form-group">
+      <label for="emp-name">Full Name</label>
+      <input type="text" id="emp-name" placeholder="e.g. John Smith"/>
+    </div>
+    <div class="form-group">
+      <label for="emp-email">Email Address</label>
+      <input type="email" id="emp-email" placeholder="e.g. john@company.com"/>
+    </div>
+    <label style="margin-bottom:8px;display:block">Onboarding Status</label>
+    <div class="checkbox-group">
+      <div class="checkbox-item"><input type="checkbox" id="doc-check"/><label for="doc-check">📄 Document Submitted</label></div>
+      <div class="checkbox-item"><input type="checkbox" id="it-check"/><label for="it-check">💻 IT Setup Done</label></div>
+      <div class="checkbox-item"><input type="checkbox" id="train-check"/><label for="train-check">🎓 Training Completed</label></div>
+    </div>
+    <button class="btn" id="addBtn" onclick="addEmployee()">Add Employee</button>
+  </div>
+
+  <div class="panel table-panel">
+    <div class="panel-title"><span>📋</span> Employee List</div>
+    <input class="search-bar" type="text" id="search" placeholder="🔍 Search by name or email..." oninput="renderTable()"/>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Name</th><th>Email</th><th>Progress</th><th>Docs</th><th>IT</th><th>Training</th><th>Action</th></tr></thead>
+        <tbody id="emp-table-body"></tbody>
+      </table>
+      <div class="empty-state" id="empty-state"><div class="icon">📭</div>No employees found. Add one to get started!</div>
+    </div>
+  </div>
+</main>
+
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h2>✏️ Update Onboarding Status</h2>
+    <p style="color:var(--muted);font-size:.85rem;margin-bottom:18px" id="modal-name"></p>
+    <div class="checkbox-group">
+      <div class="checkbox-item"><input type="checkbox" id="m-doc"/><label for="m-doc">📄 Document Submitted</label></div>
+      <div class="checkbox-item"><input type="checkbox" id="m-it"/><label for="m-it">💻 IT Setup Done</label></div>
+      <div class="checkbox-item"><input type="checkbox" id="m-train"/><label for="m-train">🎓 Training Completed</label></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-save" onclick="saveUpdate()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+  /* ── Particle System ── */
+  const canvas=document.getElementById('canvas'),ctx=canvas.getContext('2d');let W,H,particles=[];
+  function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight}
+  resize();window.addEventListener('resize',()=>{resize();initP()});
+  class P{constructor(){this.reset(true)}reset(r=false){this.x=Math.random()*W;this.y=r?Math.random()*H:H+10;this.r=Math.random()*1.2+0.3;this.vx=(Math.random()-0.5)*0.25;this.vy=-(Math.random()*0.4+0.15);this.a=Math.random()*0.5+0.1;this.c=Math.random()>0.5?'108,99,255':'34,211,238'}update(){this.x+=this.vx;this.y+=this.vy;if(this.y<-10)this.reset()}draw(){ctx.beginPath();ctx.arc(this.x,this.y,this.r,0,Math.PI*2);ctx.fillStyle=`rgba(${this.c},${this.a})`;ctx.fill()}}
+  function initP(){particles=Array.from({length:80},()=>new P())}initP();
+  function drawC(){for(let i=0;i<particles.length;i++)for(let j=i+1;j<particles.length;j++){const dx=particles[i].x-particles[j].x,dy=particles[i].y-particles[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<90){ctx.beginPath();ctx.moveTo(particles[i].x,particles[i].y);ctx.lineTo(particles[j].x,particles[j].y);ctx.strokeStyle=`rgba(108,99,255,${0.05*(1-d/90)})`;ctx.lineWidth=0.4;ctx.stroke()}}}
+  function animP(){ctx.clearRect(0,0,W,H);drawC();particles.forEach(p=>{p.update();p.draw()});requestAnimationFrame(animP)}animP();
+
+  /* ── Ripple on buttons ── */
+  document.querySelectorAll('.btn').forEach(btn=>{btn.addEventListener('click',function(e){const r=document.createElement('span');r.classList.add('ripple');const rect=btn.getBoundingClientRect();const s=Math.max(rect.width,rect.height);r.style.cssText=`width:${s}px;height:${s}px;left:${e.clientX-rect.left-s/2}px;top:${e.clientY-rect.top-s/2}px`;btn.appendChild(r);setTimeout(()=>r.remove(),600)})});
+
+  /* ── Counter Animation ── */
+  function animateCount(el,target){let current=parseInt(el.textContent)||0;if(current===target)return;const step=target>current?1:-1;const delay=Math.max(30,200/Math.abs(target-current));const timer=setInterval(()=>{current+=step;el.textContent=current;if(current===target)clearInterval(timer)},delay)}
+
+  /* ── Row animation ── */
+  function animateRows(){document.querySelectorAll('#emp-table-body tr').forEach((tr,i)=>{tr.style.opacity='0';tr.style.transform='translateY(8px)';tr.style.transition=`opacity .3s ${i*0.04}s, transform .3s ${i*0.04}s`;requestAnimationFrame(()=>{tr.style.opacity='1';tr.style.transform='translateY(0)'})})}
+
+  /* ── API Logic ── */
+  const API='/employees';let employees=[],editingId=null;
+
+  async function fetchEmployees(){try{const res=await fetch(API);employees=await res.json();renderTable();updateStats()}catch(e){showToast('Failed to load employees',true)}}
+
+  async function addEmployee(){
+    const name=document.getElementById('emp-name').value.trim(),email=document.getElementById('emp-email').value.trim();
+    if(!name||!email){showToast('Please fill in name and email',true);return}
+    const body={name,email,documentSubmitted:document.getElementById('doc-check').checked,itSetupDone:document.getElementById('it-check').checked,trainingCompleted:document.getElementById('train-check').checked};
+    try{const res=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});if(!res.ok)throw new Error();document.getElementById('emp-name').value='';document.getElementById('emp-email').value='';document.getElementById('doc-check').checked=false;document.getElementById('it-check').checked=false;document.getElementById('train-check').checked=false;showToast('Employee added successfully ✅');fetchEmployees()}catch(e){showToast('Failed to add employee',true)}
+  }
+
+  function renderTable(){
+    const q=document.getElementById('search').value.toLowerCase();
+    const filtered=employees.filter(e=>e.name.toLowerCase().includes(q)||e.email.toLowerCase().includes(q));
+    const body=document.getElementById('emp-table-body'),empty=document.getElementById('empty-state');body.innerHTML='';
+    if(filtered.length===0){empty.style.display='block';return}empty.style.display='none';
+    filtered.forEach(emp=>{
+      const done=[emp.documentSubmitted,emp.itSetupDone,emp.trainingCompleted].filter(Boolean).length;
+      const pct=Math.round((done/3)*100);
+      const tr=document.createElement('tr');
+      tr.innerHTML=`<td style="color:var(--muted)">${emp.id}</td><td style="font-weight:600">${esc(emp.name)}</td><td style="color:var(--muted)">${esc(emp.email)}</td><td><div style="display:flex;align-items:center;gap:8px"><div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div><span style="font-size:.73rem;color:var(--muted)">${pct}%</span></div></td><td>${badge(emp.documentSubmitted)}</td><td>${badge(emp.itSetupDone)}</td><td>${badge(emp.trainingCompleted)}</td><td style="display:flex;gap:6px"><button class="action-btn" onclick="openModal(${emp.id})">Edit</button><button class="delete-btn" onclick="deleteEmployee(${emp.id},'${esc(emp.name)}')">🗑 Delete</button></td>`;
+      body.appendChild(tr)});
+    animateRows();
+  }
+
+  function badge(v){return v?`<span class="badge done">✓ Done</span>`:`<span class="badge pending">✗ Pending</span>`}
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+
+  function updateStats(){
+    animateCount(document.getElementById('stat-total'),employees.length);
+    animateCount(document.getElementById('stat-docs'),employees.filter(e=>e.documentSubmitted).length);
+    animateCount(document.getElementById('stat-it'),employees.filter(e=>e.itSetupDone).length);
+    animateCount(document.getElementById('stat-training'),employees.filter(e=>e.trainingCompleted).length);
+  }
+
+  function openModal(id){editingId=id;const emp=employees.find(e=>e.id===id);document.getElementById('modal-name').textContent=`${emp.name} — ${emp.email}`;document.getElementById('m-doc').checked=emp.documentSubmitted;document.getElementById('m-it').checked=emp.itSetupDone;document.getElementById('m-train').checked=emp.trainingCompleted;document.getElementById('modal').classList.add('open')}
+  function closeModal(){document.getElementById('modal').classList.remove('open');editingId=null}
+
+  async function deleteEmployee(id,name){if(!confirm(`Delete "${name}"? This cannot be undone.`))return;try{const res=await fetch(`${API}/${id}`,{method:'DELETE'});if(!res.ok)throw new Error();showToast(`${name} deleted 🗑`);fetchEmployees()}catch(e){showToast('Failed to delete',true)}}
+
+  async function saveUpdate(){
+    const emp=employees.find(e=>e.id===editingId);
+    const body={name:emp.name,email:emp.email,documentSubmitted:document.getElementById('m-doc').checked,itSetupDone:document.getElementById('m-it').checked,trainingCompleted:document.getElementById('m-train').checked};
+    try{const res=await fetch(`${API}/${editingId}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});if(!res.ok)throw new Error();closeModal();showToast('Status updated ✅');fetchEmployees()}catch(e){showToast('Failed to update',true)}
+  }
+
+  function showToast(msg,isError=false){const t=document.getElementById('toast');t.textContent=msg;t.className=isError?'error':'';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000)}
+  document.getElementById('modal').addEventListener('click',function(e){if(e.target===this)closeModal()});
+  fetchEmployees();
+</script>
+</body>
+</html>

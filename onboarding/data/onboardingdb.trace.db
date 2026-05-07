@@ -1,0 +1,6 @@
+2026-04-22 13:20:49.927001+05:30 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "Select * [*]employees"; SQL statement:
+Select * employees [42000-232]
+2026-04-22 13:20:58.495452+05:30 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "EMPLOYEES" not found; SQL statement:
+Select * from employees [42102-232]
